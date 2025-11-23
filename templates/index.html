@@ -1,0 +1,105 @@
+<!-- FILE: templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster Math Game</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <div class="container">
+        <!-- Login/Register Area -->
+        <div id="auth-area">
+            <div class="monster-header">👾 👽 🛸</div>
+            <h1>Monster Math</h1>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">Login or Register to Play!</p>
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter password">
+            </div>
+            
+            <button onclick="login()">Login</button>
+            <button onclick="register()">Register</button>
+            
+            <div id="auth-message"></div>
+        </div>
+
+        <!-- Game Type Selection Area -->
+        <div id="game-select-area" class="game-select-area hidden">
+            <h1>Choose Your Game!</h1>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">Welcome, <span id="select-player-name"></span>!</p>
+            
+            <div class="game-type-card" onclick="startGame('missing_number')">
+                <h3>🔢 Missing Number</h3>
+                <p>Find the missing number in equations</p>
+                <p style="margin-top: 10px; font-size: 0.9em;">Example: 5 + ? = 11</p>
+            </div>
+
+            <div class="game-type-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h3>🚀 Coming Soon!</h3>
+                <p>More game types on the way...</p>
+            </div>
+
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
+
+        <!-- Game Area -->
+        <div id="game-area" class="game-area hidden">
+            <h1>Monster Math</h1>
+            <p style="text-align: center; color: #666; margin-bottom: 10px;">
+                <span id="player-name"></span> - <span id="game-type-display"></span>
+            </p>
+            
+            <div class="timer">Time: <span id="timer">0.0</span>s</div>
+            
+            <div class="score-board">
+                <div class="score-item">Score: <span id="score">0</span></div>
+                <div class="score-item">Streak: <span id="streak">0</span></div>
+                <div class="score-item">Solved: <span id="solved">0</span></div>
+            </div>
+
+            <div class="puzzle-box">
+                <div class="monster-display">
+                    <span id="monster">👾</span>
+                    <span id="alien">👽</span>
+                </div>
+                <div class="puzzle-equation" id="puzzle-equation">
+                    Loading...
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="number" id="answer" placeholder="Enter your answer" onkeypress="handleKeyPress(event)">
+            </div>
+
+            <button onclick="checkAnswer()">Check Answer! 🚀</button>
+            
+            <div id="game-message"></div>
+
+            <div class="nav-buttons">
+                <button onclick="backToGameSelect()" class="back-btn">Change Game</button>
+                <button onclick="saveAndShowStats()">View Stats</button>
+                <button onclick="logout()" class="logout-btn">Logout</button>
+            </div>
+        </div>
+
+        <!-- Stats Area -->
+        <div id="stats-area" class="stats-area hidden">
+            <h2>Your Stats</h2>
+            <div id="stats-content"></div>
+            <button onclick="backToGame()">Back to Game</button>
+        </div>
+    </div>
+
+    <script src="/static/game.js"></script>
+</body>
+</html>
