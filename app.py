@@ -4,8 +4,11 @@ import sqlite3
 import hashlib
 import secrets
 from datetime import datetime
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            static_folder='static',
+            template_folder='templates')
 app.secret_key = secrets.token_hex(32)
 CORS(app)
 

@@ -165,6 +165,10 @@ button:active {
     display: none;
 }
 
+.game-select-area:not(.hidden) {
+    display: block !important;
+}
+
 .game-area {
     display: none;
 }

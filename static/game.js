@@ -199,12 +199,39 @@ function showAuthMessage(message, type) {
 }
 
 function showGameSelect(username) {
-    console.log('Showing game select for:', username);
-    document.getElementById('auth-area').classList.add('hidden');
-    document.getElementById('game-select-area').classList.remove('hidden');
-    document.getElementById('game-area').classList.add('hidden');
-    document.getElementById('stats-area').classList.add('hidden');
-    document.getElementById('select-player-name').textContent = username;
+    console.log('=== SHOW GAME SELECT CALLED ===');
+    console.log('Username:', username);
+    
+    const authArea = document.getElementById('auth-area');
+    const gameSelectArea = document.getElementById('game-select-area');
+    const gameArea = document.getElementById('game-area');
+    const statsArea = document.getElementById('stats-area');
+    
+    console.log('Auth area:', authArea);
+    console.log('Game select area:', gameSelectArea);
+    console.log('Game area:', gameArea);
+    console.log('Stats area:', statsArea);
+    
+    if (!gameSelectArea) {
+        console.error('ERROR: game-select-area not found!');
+        return;
+    }
+    
+    authArea.classList.add('hidden');
+    gameSelectArea.classList.remove('hidden');
+    gameArea.classList.add('hidden');
+    statsArea.classList.add('hidden');
+    
+    console.log('Game select display:', window.getComputedStyle(gameSelectArea).display);
+    console.log('Game select visibility:', window.getComputedStyle(gameSelectArea).visibility);
+    
+    const playerNameEl = document.getElementById('select-player-name');
+    if (playerNameEl) {
+        playerNameEl.textContent = username;
+        console.log('Player name set:', username);
+    } else {
+        console.error('ERROR: select-player-name element not found!');
+    }
 }
 
 function startGame(gameType) {
