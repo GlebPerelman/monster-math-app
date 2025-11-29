@@ -1,10 +1,18 @@
 from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
-import sqlite3
 import hashlib
 import secrets
 from datetime import datetime
 import os
+
+# Database imports - supports both SQLite (local) and PostgreSQL (production)
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    POSTGRES_AVAILABLE = True
+except ImportError:
+    POSTGRES_AVAILABLE = False
+    import sqlite3
 
 app = Flask(__name__, 
             static_folder='static',
@@ -12,39 +20,77 @@ app = Flask(__name__,
 app.secret_key = secrets.token_hex(32)
 CORS(app)
 
-# Database setup
+# Database configuration
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+# Fix for Railway's postgres:// vs postgresql:// URL
+if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
+    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+
+def get_db():
+    """Get database connection - PostgreSQL in production, SQLite locally"""
+    if DATABASE_URL and POSTGRES_AVAILABLE:
+        # PostgreSQL connection
+        conn = psycopg2.connect(DATABASE_URL)
+        return conn, 'postgres'
+    else:
+        # SQLite connection (local development)
+        conn = sqlite3.connect('math_game.db')
+        conn.row_factory = sqlite3.Row
+        return conn, 'sqlite'
+
 def init_db():
-    conn = sqlite3.connect('math_game.db')
-    c = conn.cursor()
+    """Initialize database tables"""
+    conn, db_type = get_db()
     
-    # Users table
-    c.execute('''CREATE TABLE IF NOT EXISTS users
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  username TEXT UNIQUE NOT NULL,
-                  password_hash TEXT NOT NULL,
-                  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
-    
-    # Puzzle attempts table
-    c.execute('''CREATE TABLE IF NOT EXISTS puzzle_attempts
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  user_id INTEGER NOT NULL,
-                  timestamp_utc TIMESTAMP NOT NULL,
-                  game_type TEXT NOT NULL,
-                  question TEXT NOT NULL,
-                  time_taken_seconds REAL NOT NULL,
-                  solved_correctly BOOLEAN NOT NULL,
-                  FOREIGN KEY (user_id) REFERENCES users (id))''')
+    if db_type == 'postgres':
+        cursor = conn.cursor()
+        
+        # Users table
+        cursor.execute('''CREATE TABLE IF NOT EXISTS users
+                     (id SERIAL PRIMARY KEY,
+                      username TEXT UNIQUE NOT NULL,
+                      password_hash TEXT NOT NULL,
+                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+        
+        # Puzzle attempts table
+        cursor.execute('''CREATE TABLE IF NOT EXISTS puzzle_attempts
+                     (id SERIAL PRIMARY KEY,
+                      user_id INTEGER NOT NULL,
+                      timestamp_utc TIMESTAMP NOT NULL,
+                      game_type TEXT NOT NULL,
+                      question TEXT NOT NULL,
+                      time_taken_seconds REAL NOT NULL,
+                      solved_correctly BOOLEAN NOT NULL,
+                      FOREIGN KEY (user_id) REFERENCES users (id))''')
+    else:
+        # SQLite
+        cursor = conn.cursor()
+        
+        # Users table
+        cursor.execute('''CREATE TABLE IF NOT EXISTS users
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      username TEXT UNIQUE NOT NULL,
+                      password_hash TEXT NOT NULL,
+                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+        
+        # Puzzle attempts table
+        cursor.execute('''CREATE TABLE IF NOT EXISTS puzzle_attempts
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      user_id INTEGER NOT NULL,
+                      timestamp_utc TIMESTAMP NOT NULL,
+                      game_type TEXT NOT NULL,
+                      question TEXT NOT NULL,
+                      time_taken_seconds REAL NOT NULL,
+                      solved_correctly BOOLEAN NOT NULL,
+                      FOREIGN KEY (user_id) REFERENCES users (id))''')
     
     conn.commit()
     conn.close()
+    print(f"Database initialized using: {db_type}")
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
-
-def get_db():
-    conn = sqlite3.connect('math_game.db')
-    conn.row_factory = sqlite3.Row
-    return conn
 
 # Initialize database
 init_db()
@@ -189,6 +235,7 @@ def check_session():
     if 'user_id' in session:
         return jsonify({'authenticated': True, 'username': session['username']})
     return jsonify({'authenticated': False})
+
 
 
 if __name__ == '__main__':

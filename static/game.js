@@ -12,6 +12,22 @@ let currentUsername = null;
 const monsters = ['👾', '👽', '🛸', '🤖', '👹', '🦖', '🐲'];
 const aliens = ['👽', '🛸', '🌟', '⭐', '✨', '💫'];
 
+// Number pad functions
+function addNumber(num) {
+    const answerInput = document.getElementById('answer');
+    const currentValue = answerInput.value;
+    
+    // Limit to reasonable length
+    if (currentValue.length < 4) {
+        answerInput.value = currentValue + num;
+    }
+}
+
+function deleteNumber() {
+    const answerInput = document.getElementById('answer');
+    answerInput.value = answerInput.value.slice(0, -1);
+}
+
 // Create stars
 function createStars() {
     const starsContainer = document.getElementById('stars');
@@ -242,14 +258,6 @@ function startGame(gameType) {
     document.getElementById('game-area').classList.remove('hidden');
     document.getElementById('stats-area').classList.add('hidden');
     
-    document.getElementById('player-name').textContent = currentUsername;
-    
-    // Set game type display name
-    const gameTypeNames = {
-        'missing_number': '🔢 Missing Number'
-    };
-    document.getElementById('game-type-display').textContent = gameTypeNames[gameType] || gameType;
-    
     // Reset game state
     score = 0;
     streak = 0;
@@ -259,7 +267,7 @@ function startGame(gameType) {
     // Generate first puzzle
     setTimeout(() => {
         generatePuzzle();
-        document.getElementById('answer').focus();
+        // Don't focus on input since we're using number pad
     }, 100);
 }
 
@@ -278,7 +286,7 @@ async function checkAnswer() {
     const answerInput = document.getElementById('answer');
     const userAnswer = parseInt(answerInput.value);
     
-    if (isNaN(userAnswer)) {
+    if (isNaN(userAnswer) || answerInput.value === '') {
         return;
     }
     
@@ -297,7 +305,7 @@ async function checkAnswer() {
         streak++;
         solved++;
         msgDiv.className = 'success';
-        msgDiv.textContent = `🎉 Awesome! You got it in ${timeTaken.toFixed(1)}s!`;
+        msgDiv.textContent = `🎉 Correct in ${timeTaken.toFixed(1)}s!`;
         
         updateScoreBoard();
         
@@ -305,12 +313,11 @@ async function checkAnswer() {
             answerInput.value = '';
             msgDiv.textContent = '';
             generatePuzzle();
-            answerInput.focus();
         }, 1500);
     } else {
         streak = 0;
         msgDiv.className = 'error';
-        msgDiv.textContent = '😅 Oops! Try again!';
+        msgDiv.textContent = '😅 Try again!';
         updateScoreBoard();
         
         setTimeout(() => {
@@ -329,6 +336,12 @@ function updateScoreBoard() {
 function handleKeyPress(event) {
     if (event.key === 'Enter') {
         checkAnswer();
+    } else if (event.key >= '0' && event.key <= '9') {
+        addNumber(parseInt(event.key));
+        event.preventDefault();
+    } else if (event.key === 'Backspace' || event.key === 'Delete') {
+        deleteNumber();
+        event.preventDefault();
     }
 }
 
@@ -382,8 +395,27 @@ function backToGame() {
     document.getElementById('stats-area').classList.add('hidden');
     document.getElementById('game-area').classList.remove('hidden');
     generatePuzzle();
-    document.getElementById('answer').focus();
 }
+
+// Add keyboard support
+document.addEventListener('keydown', function(event) {
+    // Only handle keys when in game area and not in an input field
+    const gameArea = document.getElementById('game-area');
+    if (!gameArea.classList.contains('hidden') && 
+        document.activeElement.tagName !== 'INPUT') {
+        
+        if (event.key >= '0' && event.key <= '9') {
+            addNumber(parseInt(event.key));
+            event.preventDefault();
+        } else if (event.key === 'Backspace' || event.key === 'Delete') {
+            deleteNumber();
+            event.preventDefault();
+        } else if (event.key === 'Enter') {
+            checkAnswer();
+            event.preventDefault();
+        }
+    }
+});
 
 async function logout() {
     try {
