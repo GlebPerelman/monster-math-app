@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
 import hashlib
@@ -112,18 +113,25 @@ def register():
     if len(password) < 4:
         return jsonify({'error': 'Password must be at least 4 characters'}), 400
     
-    conn = get_db()
-    c = conn.cursor()
+    conn, db_type = get_db()
     
     try:
-        c.execute('INSERT INTO users (username, password_hash) VALUES (?, ?)',
-                  (username, hash_password(password)))
+        if db_type == 'postgres':
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO users (username, password_hash) VALUES (%s, %s) RETURNING id',
+                          (username, hash_password(password)))
+            user_id = cursor.fetchone()[0]
+        else:
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO users (username, password_hash) VALUES (?, ?)',
+                          (username, hash_password(password)))
+            user_id = cursor.lastrowid
+        
         conn.commit()
-        user_id = c.lastrowid
         session['user_id'] = user_id
         session['username'] = username
         return jsonify({'success': True, 'username': username})
-    except sqlite3.IntegrityError:
+    except Exception as e:
         return jsonify({'error': 'Username already exists'}), 400
     finally:
         conn.close()
@@ -137,20 +145,28 @@ def login():
     if not username or not password:
         return jsonify({'error': 'Username and password required'}), 400
     
-    conn = get_db()
-    c = conn.cursor()
+    conn, db_type = get_db()
     
-    c.execute('SELECT id, username FROM users WHERE username = ? AND password_hash = ?',
-              (username, hash_password(password)))
-    user = c.fetchone()
-    conn.close()
-    
-    if user:
-        session['user_id'] = user['id']
-        session['username'] = user['username']
-        return jsonify({'success': True, 'username': user['username']})
-    else:
-        return jsonify({'error': 'Invalid username or password'}), 401
+    try:
+        if db_type == 'postgres':
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute('SELECT id, username FROM users WHERE username = %s AND password_hash = %s',
+                          (username, hash_password(password)))
+        else:
+            cursor = conn.cursor()
+            cursor.execute('SELECT id, username FROM users WHERE username = ? AND password_hash = ?',
+                          (username, hash_password(password)))
+        
+        user = cursor.fetchone()
+        
+        if user:
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            return jsonify({'success': True, 'username': user['username']})
+        else:
+            return jsonify({'error': 'Invalid username or password'}), 401
+    finally:
+        conn.close()
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
@@ -171,15 +187,22 @@ def save_attempt():
     if not game_type or question is None or time_taken is None or solved_correctly is None:
         return jsonify({'error': 'Missing required fields'}), 400
     
-    conn = get_db()
-    c = conn.cursor()
+    conn, db_type = get_db()
+    cursor = conn.cursor()
     
     timestamp_utc = datetime.utcnow().isoformat()
     
-    c.execute('''INSERT INTO puzzle_attempts 
-                 (user_id, timestamp_utc, game_type, question, time_taken_seconds, solved_correctly)
-                 VALUES (?, ?, ?, ?, ?, ?)''',
-              (session['user_id'], timestamp_utc, game_type, question, time_taken, solved_correctly))
+    if db_type == 'postgres':
+        cursor.execute('''INSERT INTO puzzle_attempts 
+                     (user_id, timestamp_utc, game_type, question, time_taken_seconds, solved_correctly)
+                     VALUES (%s, %s, %s, %s, %s, %s)''',
+                  (session['user_id'], timestamp_utc, game_type, question, time_taken, solved_correctly))
+    else:
+        cursor.execute('''INSERT INTO puzzle_attempts 
+                     (user_id, timestamp_utc, game_type, question, time_taken_seconds, solved_correctly)
+                     VALUES (?, ?, ?, ?, ?, ?)''',
+                  (session['user_id'], timestamp_utc, game_type, question, time_taken, solved_correctly))
+    
     conn.commit()
     conn.close()
     
@@ -235,7 +258,6 @@ def check_session():
     if 'user_id' in session:
         return jsonify({'authenticated': True, 'username': session['username']})
     return jsonify({'authenticated': False})
-
 
 
 if __name__ == '__main__':
