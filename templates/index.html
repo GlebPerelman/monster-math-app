@@ -1,9 +1,9 @@
-"""
+<!-- FILE: templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Monster Math Game</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -44,6 +44,12 @@
                 <p style="margin-top: 10px; font-size: 0.9em;">Example: 5 + ? = 11</p>
             </div>
 
+            <div class="game-type-card" onclick="startGame('more_or_less')" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <h3>➕➖ More or Less</h3>
+                <p>Answer questions about numbers</p>
+                <p style="margin-top: 10px; font-size: 0.9em;">Example: 2 more than 15</p>
+            </div>
+
             <div class="game-type-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
                 <h3>🚀 Coming Soon!</h3>
                 <p>More game types on the way...</p>
@@ -54,12 +60,7 @@
 
         <!-- Game Area -->
         <div id="game-area" class="game-area hidden">
-            <h1>Monster Math</h1>
-            <p style="text-align: center; color: #666; margin-bottom: 10px;">
-                <span id="player-name"></span> - <span id="game-type-display"></span>
-            </p>
-            
-            <div class="timer">Time: <span id="timer">0.0</span>s</div>
+            <div class="timer">⏱️ <span id="timer">0.0</span>s</div>
             
             <div class="score-board">
                 <div class="score-item">Score: <span id="score">0</span></div>
@@ -78,10 +79,28 @@
             </div>
 
             <div class="form-group">
-                <input type="number" id="answer" placeholder="Enter your answer" onkeypress="handleKeyPress(event)">
+                <input type="number" id="answer" placeholder="Your answer" readonly>
             </div>
 
-            <button onclick="checkAnswer()">Check Answer! 🚀</button>
+            <!-- Number Pad -->
+            <div class="number-pad">
+                <button class="number-btn" onclick="addNumber(0)">0</button>
+                <button class="number-btn" onclick="addNumber(1)">1</button>
+                <button class="number-btn" onclick="addNumber(2)">2</button>
+                <button class="number-btn" onclick="addNumber(3)">3</button>
+                <button class="number-btn" onclick="addNumber(4)">4</button>
+                <button class="number-btn" onclick="addNumber(5)">5</button>
+                <button class="number-btn" onclick="addNumber(6)">6</button>
+                <button class="number-btn" onclick="addNumber(7)">7</button>
+                <button class="number-btn" onclick="addNumber(8)">8</button>
+                <button class="number-btn" onclick="addNumber(9)">9</button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="delete-btn" onclick="deleteNumber()">⌫ Delete</button>
+                <button class="check-btn" onclick="checkAnswer()">✓ Check</button>
+            </div>
             
             <div id="game-message"></div>
 
@@ -103,4 +122,3 @@
     <script src="/static/game.js"></script>
 </body>
 </html>
-"""

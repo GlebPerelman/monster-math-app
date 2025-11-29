@@ -107,6 +107,47 @@ function generatePuzzle() {
             answer,
             questionText: `${num1} ${op} ? = ${result}`
         };
+    } else if (currentGameType === 'more_or_less') {
+        const questionTypes = [
+            'more_than',      // "2 more than 15" = 17
+            'less_than',      // "3 less than 20" = 17
+            'is_more_than'    // "18 is 2 more than ?" = 16
+        ];
+        
+        const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+        let baseNum, difference, answer, questionText;
+        
+        if (type === 'more_than') {
+            // "X more than Y" = Y + X
+            baseNum = Math.floor(Math.random() * 15) + 5;  // 5-19
+            difference = Math.floor(Math.random() * 5) + 1;  // 1-5
+            answer = baseNum + difference;
+            questionText = `${difference} more than ${baseNum} is`;
+        } else if (type === 'less_than') {
+            // "X less than Y" = Y - X
+            baseNum = Math.floor(Math.random() * 15) + 10;  // 10-24
+            difference = Math.floor(Math.random() * 5) + 1;  // 1-5
+            answer = baseNum - difference;
+            questionText = `${difference} less than ${baseNum} is`;
+        } else {
+            // "X is Y more/less than ?" 
+            const isMore = Math.random() > 0.5;
+            const resultNum = Math.floor(Math.random() * 15) + 10;  // 10-24
+            difference = Math.floor(Math.random() * 5) + 1;  // 1-5
+            
+            if (isMore) {
+                answer = resultNum - difference;
+                questionText = `${resultNum} is ${difference} more than`;
+            } else {
+                answer = resultNum + difference;
+                questionText = `${resultNum} is ${difference} less than`;
+            }
+        }
+        
+        currentPuzzle = {
+            answer,
+            questionText
+        };
     }
     
     console.log('Puzzle created:', currentPuzzle);
