@@ -335,10 +335,11 @@ button:active {
 
 /* Number pad styles */
 .number-pad {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
     margin: 15px 0;
+    overflow-x: auto;
 }
 
 .number-btn {
@@ -352,6 +353,8 @@ button:active {
     cursor: pointer;
     transition: transform 0.1s;
     margin: 0;
+    flex: 1;
+    min-width: 45px;
 }
 
 .number-btn:active {
@@ -359,9 +362,14 @@ button:active {
 }
 
 @media (max-width: 768px) {
+    .number-pad {
+        gap: 4px;
+    }
+    
     .number-btn {
-        padding: 18px;
+        padding: 18px 10px;
         font-size: 22px;
+        min-width: 30px;
     }
 }
 
