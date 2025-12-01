@@ -122,13 +122,13 @@ function generatePuzzle() {
             baseNum = Math.floor(Math.random() * 15) + 5;  // 5-19
             difference = Math.floor(Math.random() * 5) + 1;  // 1-5
             answer = baseNum + difference;
-            questionText = `${difference} more than ${baseNum} is`;
+            questionText = `${difference} more than ${baseNum}`;
         } else if (type === 'less_than') {
             // "X less than Y" = Y - X
             baseNum = Math.floor(Math.random() * 15) + 10;  // 10-24
             difference = Math.floor(Math.random() * 5) + 1;  // 1-5
             answer = baseNum - difference;
-            questionText = `${difference} less than ${baseNum} is`;
+            questionText = `${difference} less than ${baseNum}`;
         } else {
             // "X is Y more/less than ?" 
             const isMore = Math.random() > 0.5;
@@ -148,6 +148,48 @@ function generatePuzzle() {
             answer,
             questionText
         };
+    } else if (currentGameType === 'part_whole') {
+        // Generate part-whole puzzle
+        // Whole = Part1 + Part2
+        const whole = Math.floor(Math.random() * 15) + 6;  // 6-20
+        const part1 = Math.floor(Math.random() * (whole - 1)) + 1;  // 1 to whole-1
+        const part2 = whole - part1;
+        
+        // Randomly decide which number is missing (0=whole, 1=part1, 2=part2)
+        const missingPosition = Math.floor(Math.random() * 3);
+        
+        let topValue, leftValue, rightValue, answer, questionText;
+        
+        if (missingPosition === 0) {
+            // Missing whole
+            topValue = '?';
+            leftValue = part1;
+            rightValue = part2;
+            answer = whole;
+            questionText = `Find the whole`;
+        } else if (missingPosition === 1) {
+            // Missing part1
+            topValue = whole;
+            leftValue = '?';
+            rightValue = part2;
+            answer = part1;
+            questionText = `Find the missing part`;
+        } else {
+            // Missing part2
+            topValue = whole;
+            leftValue = part1;
+            rightValue = '?';
+            answer = part2;
+            questionText = `Find the missing part`;
+        }
+        
+        currentPuzzle = {
+            answer,
+            questionText,
+            topValue,
+            leftValue,
+            rightValue
+        };
     }
     
     console.log('Puzzle created:', currentPuzzle);
@@ -156,15 +198,47 @@ function generatePuzzle() {
     const monsterEl = document.getElementById('monster');
     const alienEl = document.getElementById('alien');
     const equationEl = document.getElementById('puzzle-equation');
+    const partWholeDiagram = document.getElementById('part-whole-diagram');
     
-    if (monsterEl && alienEl && equationEl) {
+    console.log('Equation element:', equationEl);
+    console.log('Part-whole diagram:', partWholeDiagram);
+    console.log('Current game type:', currentGameType);
+    
+    if (currentGameType === 'part_whole') {
+        // Show diagram, hide equation text
+        console.log('Setting up part-whole diagram...');
+        if (equationEl) {
+            equationEl.classList.add('hidden');
+            console.log('Equation hidden');
+        }
+        if (partWholeDiagram) {
+            partWholeDiagram.classList.remove('hidden');
+            console.log('Diagram shown');
+            document.getElementById('top-circle-text').textContent = currentPuzzle.topValue;
+            document.getElementById('left-circle-text').textContent = currentPuzzle.leftValue;
+            document.getElementById('right-circle-text').textContent = currentPuzzle.rightValue;
+            console.log('Circle values set:', currentPuzzle.topValue, currentPuzzle.leftValue, currentPuzzle.rightValue);
+        } else {
+            console.error('Part-whole diagram element not found!');
+        }
+    } else {
+        // Show equation text, hide diagram
+        console.log('Setting up text equation...');
+        if (partWholeDiagram) {
+            partWholeDiagram.classList.add('hidden');
+        }
+        if (equationEl) {
+            equationEl.classList.remove('hidden');
+            equationEl.textContent = currentPuzzle.questionText;
+        }
+    }
+    
+    if (monsterEl && alienEl) {
         monsterEl.textContent = monsters[Math.floor(Math.random() * monsters.length)];
         alienEl.textContent = aliens[Math.floor(Math.random() * aliens.length)];
-        equationEl.textContent = currentPuzzle.questionText;
-        console.log('UI Updated successfully!');
-    } else {
-        console.error('ERROR: One or more UI elements not found!');
     }
+    
+    console.log('UI Updated successfully!');
     
     // Start timer for this puzzle
     startTimer();

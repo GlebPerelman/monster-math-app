@@ -50,6 +50,12 @@
                 <p style="margin-top: 10px; font-size: 0.9em;">Example: 2 more than 15</p>
             </div>
 
+            <div class="game-type-card" onclick="startGame('part_whole')" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <h3>⭕ Part-Whole</h3>
+                <p>Find the missing number in circles</p>
+                <p style="margin-top: 10px; font-size: 0.9em;">Top = Bottom + Bottom</p>
+            </div>
+
             <div class="game-type-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
                 <h3>🚀 Coming Soon!</h3>
                 <p>More game types on the way...</p>
@@ -73,8 +79,31 @@
                     <span id="monster">👾</span>
                     <span id="alien">👽</span>
                 </div>
+                
+                <!-- Text equation (for missing_number and more_or_less) -->
                 <div class="puzzle-equation" id="puzzle-equation">
                     Loading...
+                </div>
+                
+                <!-- Part-Whole diagram (for part_whole game) -->
+                <div id="part-whole-diagram" class="part-whole-diagram hidden">
+                    <svg viewBox="0 0 300 250" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Top circle (whole) -->
+                        <circle cx="150" cy="60" r="50" fill="white" stroke="#764ba2" stroke-width="4"/>
+                        <text x="150" y="70" text-anchor="middle" font-size="32" font-weight="bold" fill="#764ba2" id="top-circle-text">?</text>
+                        
+                        <!-- Lines connecting -->
+                        <line x1="150" y1="110" x2="90" y2="150" stroke="#764ba2" stroke-width="3"/>
+                        <line x1="150" y1="110" x2="210" y2="150" stroke="#764ba2" stroke-width="3"/>
+                        
+                        <!-- Bottom left circle (part 1) -->
+                        <circle cx="90" cy="180" r="50" fill="white" stroke="#667eea" stroke-width="4"/>
+                        <text x="90" y="190" text-anchor="middle" font-size="32" font-weight="bold" fill="#667eea" id="left-circle-text">?</text>
+                        
+                        <!-- Bottom right circle (part 2) -->
+                        <circle cx="210" cy="180" r="50" fill="white" stroke="#667eea" stroke-width="4"/>
+                        <text x="210" y="190" text-anchor="middle" font-size="32" font-weight="bold" fill="#667eea" id="right-circle-text">?</text>
+                    </svg>
                 </div>
             </div>
 
