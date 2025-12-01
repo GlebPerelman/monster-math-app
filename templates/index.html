@@ -88,13 +88,13 @@
                 <!-- Part-Whole diagram (for part_whole game) -->
                 <div id="part-whole-diagram" class="part-whole-diagram hidden">
                     <svg viewBox="0 0 300 250" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Lines connecting (drawn first so circles are on top) -->
+                        <line x1="150" y1="60" x2="90" y2="180" stroke="#764ba2" stroke-width="3"/>
+                        <line x1="150" y1="60" x2="210" y2="180" stroke="#764ba2" stroke-width="3"/>
+                        
                         <!-- Top circle (whole) -->
                         <circle cx="150" cy="60" r="50" fill="white" stroke="#764ba2" stroke-width="4"/>
                         <text x="150" y="70" text-anchor="middle" font-size="32" font-weight="bold" fill="#764ba2" id="top-circle-text">?</text>
-                        
-                        <!-- Lines connecting -->
-                        <line x1="150" y1="110" x2="90" y2="150" stroke="#764ba2" stroke-width="3"/>
-                        <line x1="150" y1="110" x2="210" y2="150" stroke="#764ba2" stroke-width="3"/>
                         
                         <!-- Bottom left circle (part 1) -->
                         <circle cx="90" cy="180" r="50" fill="white" stroke="#667eea" stroke-width="4"/>
